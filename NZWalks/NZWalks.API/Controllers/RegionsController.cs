@@ -1,14 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.Domain;
-using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
-using System.Runtime;
 
 namespace NZWalks.API.Controllers
 {
     [ApiController]
-    [Route("Regions")]
+    [Route("[controller]")]
     public class RegionsController : Controller
     {
         private readonly IRegionRepository regionRepository;
@@ -21,13 +19,28 @@ namespace NZWalks.API.Controllers
         }
 
 
-
         [HttpGet]
         public async Task<IActionResult> GetAllRegionsAsync()
         {
             var regions = await regionRepository.GetAllAsync();
 
+            // return DTO regions
+            //var regionsDTO = new List<Models.DTO.Region>();
+            //regions.ToList().ForEach(region =>
+            //{
+            //    var regionDTO = new Models.DTO.Region()
+            //    {
+            //        Id = region.Id,
+            //        Code = region.Code,
+            //        Name = region.Name,
+            //        Area = region.Area,
+            //        Lat = region.Lat,
+            //        Long = region.Long,
+            //        Population = region.Population,
+            //    };
 
+            //    regionsDTO.Add(regionDTO);
+            //});
 
             var regionsDTO = mapper.Map<List<Models.DTO.Region>>(regions);
 
@@ -40,20 +53,21 @@ namespace NZWalks.API.Controllers
         public async Task<IActionResult> GetRegionAsync(Guid id)
         {
             var region = await regionRepository.GetAsync(id);
-            if(region == null)
+
+            if (region == null)
             {
                 return NotFound();
             }
 
             var regionDTO = mapper.Map<Models.DTO.Region>(region);
-
             return Ok(regionDTO);
         }
-        
+
+
         [HttpPost]
         public async Task<IActionResult> AddRegionAsync(Models.DTO.AddRegionRequest addRegionRequest)
         {
-            //Request(dto) to Domain model
+            // Request(DTO) to Domain model
             var region = new Models.Domain.Region()
             {
                 Code = addRegionRequest.Code,
@@ -61,13 +75,14 @@ namespace NZWalks.API.Controllers
                 Lat = addRegionRequest.Lat,
                 Long = addRegionRequest.Long,
                 Name = addRegionRequest.Name,
-                Population = addRegionRequest.Population,
+                Population = addRegionRequest.Population
             };
 
-            //Pass details to Repository
+            // Pass details to Repository
             region = await regionRepository.AddAsync(region);
 
-            //Convert back to DTO
+            // Convert back to DTO
+
             var regionDTO = new Models.DTO.Region
             {
                 Id = region.Id,
@@ -76,10 +91,10 @@ namespace NZWalks.API.Controllers
                 Lat = region.Lat,
                 Long = region.Long,
                 Name = region.Name,
-                Population = region.Population,
+                Population = region.Population
             };
 
-            return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDTO.Id, regionDTO });
+            return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDTO.Id }, regionDTO);
         }
 
         [HttpDelete]
@@ -89,13 +104,13 @@ namespace NZWalks.API.Controllers
             // Get region from database
             var region = await regionRepository.DeleteAsync(id);
 
-            //If null NotFound
+            // If null NotFound
             if (region == null)
             {
                 return NotFound();
             }
 
-            //Convert response back to DTO
+            // Convert response back to DTO
             var regionDTO = new Models.DTO.Region
             {
                 Id = region.Id,
@@ -104,11 +119,11 @@ namespace NZWalks.API.Controllers
                 Lat = region.Lat,
                 Long = region.Long,
                 Name = region.Name,
-                Population = region.Population,
-
+                Population = region.Population
             };
 
-            //return Ok response
+
+            // return Ok response
             return Ok(regionDTO);
         }
 
@@ -116,7 +131,7 @@ namespace NZWalks.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] Models.DTO.UpdateRegionRequest updateRegionRequest)
         {
-            //convert DTO to Domain model
+            // Convert DTO to Domain model
             var region = new Models.Domain.Region()
             {
                 Code = updateRegionRequest.Code,
@@ -124,20 +139,21 @@ namespace NZWalks.API.Controllers
                 Lat = updateRegionRequest.Lat,
                 Long = updateRegionRequest.Long,
                 Name = updateRegionRequest.Name,
-                Population = updateRegionRequest.Population,
+                Population = updateRegionRequest.Population
             };
 
-            //Update region using repository
+
+            // Update Region using repository
             region = await regionRepository.UpdateAsync(id, region);
 
-            //If Null then not found
+
+            // If Null then NotFound
             if (region == null)
             {
                 return NotFound();
             }
 
-            //Convert Domain back to DTO
-
+            // Convert Domain back to DTO
             var regionDTO = new Models.DTO.Region
             {
                 Id = region.Id,
@@ -146,12 +162,11 @@ namespace NZWalks.API.Controllers
                 Lat = region.Lat,
                 Long = region.Long,
                 Name = region.Name,
-                Population = region.Population,
-
+                Population = region.Population
             };
 
 
-            //Return ok response
+            // Return Ok response
             return Ok(regionDTO);
         }
     }
