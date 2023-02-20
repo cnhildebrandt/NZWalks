@@ -24,10 +24,10 @@ namespace NZWalks.API.Repositories
             claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
 
             // Loop into roles of users
-            //user.Roles.ForEach((role) =>
-            //{
-            //    claims.Add(new Claim(ClaimTypes.Role, role));
-            //});
+            user.Roles.ForEach((role) =>
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            });
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
